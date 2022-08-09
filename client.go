@@ -652,6 +652,7 @@ func (c *Client) connectToNode(node *Node) error {
 }
 
 func (c *Client) connect(maxRetries int) error {
+	errLog := "c.connect()\n"
 	retryInterval := c.config.MinReconnectInterval
 	for retry := 1; maxRetries == 0 || retry <= maxRetries; retry++ {
 		if retry > 1 {
@@ -666,19 +667,21 @@ func (c *Client) connect(maxRetries int) error {
 		node, err := GetWsAddr(c.Address(), c.config)
 		if err != nil {
 			log.Println(err)
+			errLog = errLog + err.Error() + "\n"
 			continue
 		}
 
 		err = c.connectToNode(node)
 		if err != nil {
 			log.Println(err)
+			errLog = errLog + err.Error() + "\n"
 			continue
 		}
 
 		return nil
 	}
 
-	return ErrConnectFailed
+	return errors.New(errLog)
 }
 
 // Reconnect forces the client to find node and connect again.
